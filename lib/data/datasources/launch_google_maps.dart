@@ -5,15 +5,21 @@ class MapUtils {
 
   MapUtils._();
 
-  static Future<void> openMap(double startLat, double startLng, double endLat, double endLng) async {
-    final String url = 'https://www.google.com/maps/dir/?api=1&origin=43.7967876,-79.5331616&destination=43.5184049,-79.8473993&travelmode=driving&dir_action=navigate';
+  static Future<void> openMap(List<Map<String, double>> routeData) async {
+    print(routeData);
+    String origin = '${routeData[0]['lat']},${routeData[0]['lng']}';
+    String destination = '${routeData[1]['lat']},${routeData[1]['lng']}';
+    String waypoints = routeData
+        .sublist(2)
+        .map((point) => '${point['lat']},${point['lng']}')
+        .join('|');
+
+    String url = 'https://www.google.com/maps/dir/?api=1&origin=$origin&destination=$destination&waypoints=$waypoints&travelmode=driving';
 
     if (await canLaunchUrl(Uri.parse(url))) {
       await launchUrl(Uri.parse(url));
     } else {
       throw 'Could not launch $url';
     }
-
   }
-
 }

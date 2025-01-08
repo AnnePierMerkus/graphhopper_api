@@ -2,14 +2,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-class ApiCallScreen extends StatefulWidget {
-  @override
-  _ApiCallScreenState createState() => _ApiCallScreenState();
-}
+class GraphHopperAPICall {
+  GraphHopperAPICall._();
 
-class _ApiCallScreenState extends State<ApiCallScreen> {
-
-  Future<void> _fetchRouteData() async {
+  static Future<List<Map<String, double>>> fetchRouteData() async {
     final String apiKey = "02a1c92a-cd2e-460d-8125-7ccfe7ab4ad3";
     final String baseUrl = "https://graphhopper.com/api/1/route";
 
@@ -36,15 +32,14 @@ class _ApiCallScreenState extends State<ApiCallScreen> {
       'details': [
         'road_class',
         'surface',
-        'max_speed',  // Ensure 'max_speed' is included in details
+        'max_speed',
       ],
     };
 
-    // Prepare the payload, without the API key
     Map<String, dynamic> payload = {
       'points': [
-        [4.920020, 52.365760],  // origin
-        [5.110278, 52.089444],  // destination
+        [4.920020, 52.365760], // origin
+        [5.110278, 52.089444], // destination
       ],
       'custom_model': customModel,
       'profile': params['vehicle'],
@@ -56,10 +51,7 @@ class _ApiCallScreenState extends State<ApiCallScreen> {
       'details': ['max_speed'],
     };
 
-    // Log the payload before sending
-    print("Payload: ${json.encode(payload)}");
 
-    // Send the POST request with the API key in the URL
     final url = "$baseUrl?key=$apiKey";
 
     try {
@@ -71,12 +63,11 @@ class _ApiCallScreenState extends State<ApiCallScreen> {
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
-        final List<Map<String, double>> decodedPolyline = decodePolyline(data["paths"][0]["points"]);
+        final List<Map<String, double>> decodedPolyline =
+            decodePolyline(data["paths"][0]["points"]);
 
-        // Extract speed limits and log the details
         var speedLimits = data["paths"][0]["details"]["max_speed"];
 
-        print(speedLimits.length / 8);
         int length = speedLimits.length;
         int numPoints = 8;
         double interval = (length - 2) / numPoints;
@@ -89,28 +80,16 @@ class _ApiCallScreenState extends State<ApiCallScreen> {
         if (interval == 0) {
           interval = 1;
         }
+        List<Map<String, double>> pointsList = [];
 
-        print(length);
-        print(interval);
-        print(selectedIndices);
+        pointsList.add(decodedPolyline[speedLimits[0][0]]);
+        pointsList.add(decodedPolyline[speedLimits[length -1][1]]);
         for (int i in selectedIndices) {
-
           var segment = speedLimits[i];
           var fromIndex = segment[0];
-          var toIndex = segment[1];
-          var speedLimit = segment[2];
-
-          // Fetch the corresponding lat and lng values
-          var startPoint = decodedPolyline[fromIndex]['lat'];
-          var endPoint = decodedPolyline[fromIndex]['lng'];
-
-          // Log the segment information
-          print("Segment from $fromIndex to $toIndex:");
-          print("Start Point: $startPoint, End Point: $endPoint");
-          print("Speed Limit: $speedLimit km/h");
-        };
-
-        print("API Response: $decodedPolyline");
+          pointsList.add(decodedPolyline[fromIndex]);
+        }
+        return pointsList;
       } else {
         print("Failed to fetch route data: ${response.statusCode}");
         print("Response body: ${response.body}");
@@ -118,9 +97,11 @@ class _ApiCallScreenState extends State<ApiCallScreen> {
     } catch (e) {
       print("Error occurred: $e");
     }
+
+    return [];
   }
 
-  List<Map<String, double>> decodePolyline(String encoded) {
+  static List<Map<String, double>> decodePolyline(String encoded) {
     List<Map<String, double>> coordinates = [];
     int index = 0;
     int lat = 0;
@@ -155,21 +136,5 @@ class _ApiCallScreenState extends State<ApiCallScreen> {
     }
 
     return coordinates;
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchRouteData();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("API Call Example")),
-      body: Center(
-        child: Text("Check the console for API response."),
-      ),
-    );
   }
 }
