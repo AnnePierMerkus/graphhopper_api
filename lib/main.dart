@@ -58,7 +58,7 @@ class _MyAppState extends State<MyApp> {
                   String startAddress = startController.text;
                   String destinationAddress = destinationController.text;
                   if (startAddress.isNotEmpty && destinationAddress.isNotEmpty) {
-                    List<Map<String, double>> routeData = await GraphHopperAPICall.fetchRouteData(52.3600855,4.9156198, 52.0894311,5.1073394);
+                    List<Map<String, double>> routeData = await GraphHopperAPICall.fetchRouteData(52.365760, 4.920020, 52.089444, 5.110278);
                     MapUtils.openMap(startAddress, destinationAddress, routeData);
                   }
                 },

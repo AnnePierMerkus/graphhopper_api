@@ -6,16 +6,8 @@ class GraphHopperAPICall {
   GraphHopperAPICall._();
 
   static Future<List<Map<String, double>>> fetchRouteData(double startLat, double startLng, double destinationLat, double destinationLng) async {
-    final String apiKey = "";
+    final String apiKey = "354228c0-cdd7-4c72-b31a-915f297cf782";
     final String baseUrl = "https://graphhopper.com/api/1/route";
-
-    // Define the params and customModel
-    Map<String, dynamic> params = {
-      'vehicle': 'car',
-      'locale': 'en',
-      'instructions': true,
-      'calc_points': true,
-    };
 
     Map<String, dynamic> customModel = {
       'priority': [
@@ -23,17 +15,7 @@ class GraphHopperAPICall {
           'if': 'max_speed > 60',
           'multiply_by': 0,
         },
-      ],
-      'snap_preventions': [
-        'motorway',
-        'ferry',
-        'tunnel',
-      ],
-      'details': [
-        'road_class',
-        'surface',
-        'max_speed',
-      ],
+      ]
     };
 
     Map<String, dynamic> payload = {
@@ -42,13 +24,17 @@ class GraphHopperAPICall {
         [destinationLng, destinationLat], // destination
       ],
       'custom_model': customModel,
-      'profile': params['vehicle'],
-      'locale': params['locale'],
-      'instructions': params['instructions'],
-      'calc_points': params['calc_points'],
+      'profile': 'car',
+      'locale': 'en',
+      'instructions': true,
+      'calc_points': true,
       'points_encoded': true,
       'ch.disable': true,
       'details': ['max_speed'],
+      'snap_preventions': [
+        'motorway',
+        'tunnel'
+      ]
     };
 
 
@@ -69,7 +55,7 @@ class GraphHopperAPICall {
         var speedLimits = data["paths"][0]["details"]["max_speed"];
 
         int length = speedLimits.length;
-        int numPoints = 8;
+        int numPoints = (length - 2) > 8 ? 8 : length - 2;
         double interval = (length - 2) / numPoints;
 
         List<int> selectedIndices = [];
@@ -77,9 +63,8 @@ class GraphHopperAPICall {
           int index = (interval * i).round();
           selectedIndices.add(index);
         }
-        if (interval == 0) {
-          interval = 1;
-        }
+
+
         List<Map<String, double>> pointsList = [];
 
         pointsList.add(decodedPolyline[speedLimits[0][0]]);
@@ -92,7 +77,6 @@ class GraphHopperAPICall {
         return pointsList;
       } else {
         print("Failed to fetch route data: ${response.statusCode}");
-        print("Response body: ${response.body}");
       }
     } catch (e) {
       print("Error occurred: $e");

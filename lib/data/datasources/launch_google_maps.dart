@@ -6,7 +6,6 @@ class MapUtils {
   MapUtils._();
 
   static Future<void> openMap( String startAddress, String destinationAddress,List<Map<String, double>> routeData) async {
-    print(startAddress);
     String origin = '${routeData[0]['lat']},${routeData[0]['lng']}';
     String destination = '${routeData[1]['lat']},${routeData[1]['lng']}';
     String waypoints = routeData
