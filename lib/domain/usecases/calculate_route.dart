@@ -5,8 +5,8 @@ import 'package:http/http.dart' as http;
 class GraphHopperAPICall {
   GraphHopperAPICall._();
 
-  static Future<List<Map<String, double>>> fetchRouteData() async {
-    final String apiKey = "02a1c92a-cd2e-460d-8125-7ccfe7ab4ad3";
+  static Future<List<Map<String, double>>> fetchRouteData(double startLat, double startLng, double destinationLat, double destinationLng) async {
+    final String apiKey = "";
     final String baseUrl = "https://graphhopper.com/api/1/route";
 
     // Define the params and customModel
@@ -38,8 +38,8 @@ class GraphHopperAPICall {
 
     Map<String, dynamic> payload = {
       'points': [
-        [4.920020, 52.365760], // origin
-        [5.110278, 52.089444], // destination
+        [startLng, startLat], // origin
+        [destinationLng, destinationLat], // destination
       ],
       'custom_model': customModel,
       'profile': params['vehicle'],
